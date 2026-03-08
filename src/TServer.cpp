@@ -472,7 +472,12 @@ void TServer::ParseVehicle(TClient& c, const std::string& Pckt, TNetwork& Networ
         }
 
         if (PID != -1 && VID != -1 && PID == c.GetID()) {
-            Data = Data.substr(Data.find('{'));
+            auto BracePos = Data.find('{');
+            if (BracePos == std::string::npos) {
+                beammp_debug("Invalid 'Or' packet from " + c.GetName() + ": missing '{' in data");
+                return;
+            }
+            Data = Data.substr(BracePos);
             LuaAPI::MP::Engine->ReportErrors(LuaAPI::MP::Engine->TriggerEvent("onVehicleReset", "", c.GetID(), VID, Data));
             Network.SendToAll(&c, StringToVector(Packet), false, true);
         }
@@ -501,7 +506,12 @@ void TServer::ParseVehicle(TClient& c, const std::string& Pckt, TNetwork& Networ
         }
 
         if (PID != -1 && VID != -1 && PID == c.GetID()) {
-            Data = Data.substr(Data.find('['));
+            auto BracketPos = Data.find('[');
+            if (BracketPos == std::string::npos) {
+                beammp_debug("Invalid 'Op' packet from " + c.GetName() + ": missing '[' in data");
+                return;
+            }
+            Data = Data.substr(BracketPos);
             LuaAPI::MP::Engine->ReportErrors(LuaAPI::MP::Engine->TriggerEvent("onVehiclePaintChanged", "", c.GetID(), VID, Data));
             Network.SendToAll(&c, StringToVector(Packet), false, true);
 
